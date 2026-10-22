@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energie im Kondensator – Physik 12</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{
+  --bg:#eef9fb; --card:#ffffff; --text:#0f2d33; --muted:#51767d;
+  --primary:#0f8fa6; --primary-dark:#0a6678; --primary-light:#58d6e8;
+  --accent:#f5a524; --border:#c3ebf1;
+  --correct:#2f9e44; --wrong:#d6455a; --fein:#8b5cf6;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:'Inter',Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding-bottom:3rem;}
+h1,h2,h3{font-weight:800;color:var(--primary-dark);}
+header{background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));color:#fff;padding:.9rem 1rem;position:sticky;top:0;z-index:60;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:background .5s;}
+header.fein-active{background:linear-gradient(135deg,#5b21b6,var(--fein));}
+.header-row{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;justify-content:space-between;max-width:1100px;margin:0 auto;}
+.header-title{display:flex;align-items:center;gap:.5rem;font-size:1.1rem;font-weight:800;}
+#diamondBadge{display:none;font-size:1.3rem;color:#ffd166;animation:pulse 1.6s infinite;}
+#diamondBadge.show{display:inline;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
+.header-btns{display:flex;gap:.5rem;flex-wrap:wrap;}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:.5rem .9rem;font-size:.9rem;font-weight:600;transition:transform .1s, box-shadow .1s;}
+button:active{transform:scale(.97);}
+.btn-ghost{background:rgba(255,255,255,.18);color:#fff;}
+.btn-ghost:hover{background:rgba(255,255,255,.3);}
+.btn-primary{background:var(--accent);color:#2b1700;}
+.btn-primary:hover{box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.btn-outline{background:#fff;border:2px solid var(--primary);color:var(--primary-dark);}
+.btn-outline:hover{background:var(--border);}
+.btn-small{padding:.3rem .6rem;font-size:.8rem;}
+
+nav.tabs{display:flex;max-width:1100px;margin:0 auto;gap:.3rem;padding:.7rem 1rem 0;flex-wrap:wrap;}
+nav.tabs button{background:#dff4f7;color:var(--primary-dark);flex:1 1 auto;min-width:110px;}
+nav.tabs button.active{background:var(--primary);color:#fff;}
+
+main{max-width:1100px;margin:0 auto;padding:1rem;}
+.tabpanel{display:none;}
+.tabpanel.active{display:block;animation:fadein .25s;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(15,143,166,.08);}
+.card h2{margin-top:0;font-size:1.15rem;}
+.card h3{font-size:1rem;color:var(--primary-dark);}
+.problem-box{background:#fff4e2;border:2px solid var(--accent);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;}
+.problem-box h2{color:#8a5200;margin-top:0;}
+.intro-box{background:#e3f6f9;border:2px solid var(--primary-light);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:1rem;}
+.intro-box p{margin:0;}
+.hint{font-size:.85rem;color:var(--muted);}
+.formula{font-size:1.05rem;font-weight:700;color:var(--primary-dark);background:#e3f6f9;border-radius:8px;padding:.25rem .5rem;display:inline-block;}
+
+svg{max-width:100%;}
+.svg-wrap{text-align:center;margin:.6rem 0;}
+.hotspot{cursor:pointer;}
+.hotspot circle{fill:var(--accent);opacity:.85;}
+.hotspot:hover circle, .hotspot.active circle{fill:var(--primary);opacity:1;}
+.hotspot text{font-size:13px;font-weight:700;fill:#fff;pointer-events:none;}
+#hotspotInfo{min-height:4.2em;background:#e3f6f9;border-radius:10px;padding:.6rem .8rem;margin-top:.5rem;font-size:.92rem;}
+
+.match-area{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:.6rem;}
+.match-col{flex:1 1 260px;display:flex;flex-direction:column;gap:.5rem;}
+.chip{background:#e3f6f9;border:2px solid var(--primary-light);border-radius:10px;padding:.55rem .7rem;font-size:.9rem;cursor:grab;user-select:none;}
+.chip.selected{outline:3px solid var(--accent);}
+.chip.used{opacity:.4;cursor:default;}
+.dropzone{background:#f6fbfc;border:2px dashed var(--border);border-radius:10px;padding:.55rem .7rem;font-size:.88rem;min-height:3em;display:flex;align-items:center;}
+.dropzone.filled{border-style:solid;}
+.dropzone.correct{border-color:var(--correct);background:#e8f8ec;}
+.dropzone.incorrect{border-color:var(--wrong);background:#fbe9ec;}
+.tap-hint{font-size:.78rem;color:var(--muted);margin-top:-.3rem;margin-bottom:.4rem;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:1.4em;height:1.4em;border-radius:50%;background:var(--primary);color:#fff;font-size:.8rem;font-weight:800;margin-right:.4rem;flex-shrink:0;}
+
+.slider-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin:.5rem 0;}
+input[type=range]{flex:1 1 220px;accent-color:var(--primary);}
+.c-choice{display:flex;gap:.4rem;flex-wrap:wrap;}
+.c-choice button{background:#e3f6f9;color:var(--primary-dark);}
+.c-choice button.active{background:var(--primary);color:#fff;}
+.readout{font-weight:700;color:var(--primary-dark);}
+
+.checkpoint{background:#e3f6f9;border-left:5px solid var(--primary);border-radius:10px;padding:.8rem 1rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;}
+
+.merksatz{background:#fff;border-left:5px solid var(--accent);border-radius:8px;padding:.6rem .9rem;margin:.5rem 0;font-weight:600;}
+
+label.task-label{display:block;font-weight:700;margin-bottom:.3rem;}
+input[type=text], input[type=number], textarea, select{width:100%;padding:.5rem .6rem;border:2px solid var(--border);border-radius:8px;font-size:.95rem;font-family:inherit;}
+textarea{min-height:5em;resize:vertical;}
+.feedback{font-size:.88rem;margin-top:.35rem;padding:.4rem .6rem;border-radius:8px;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:#e8f8ec;color:var(--correct);}
+.feedback.bad{background:#fbe9ec;color:var(--wrong);}
+.musterloesung{margin-top:.5rem;background:#f1f1fb;border-radius:8px;padding:.6rem .8rem;display:none;font-size:.9rem;}
+.musterloesung.show{display:block;}
+.task{border-top:1px solid var(--border);padding-top:.8rem;margin-top:.8rem;}
+.task:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+.radio-opt{display:block;margin:.3rem 0;font-size:.92rem;}
+
+.geo-table{width:100%;border-collapse:collapse;margin-top:.5rem;font-size:.9rem;}
+.geo-table th,.geo-table td{border:1px solid var(--border);padding:.4rem .5rem;text-align:center;}
+.geo-table select{padding:.25rem;}
+
+.easter-egg{display:none;background:linear-gradient(135deg,#fff7e0,#ffe9b0);border:2px solid var(--accent);border-radius:12px;padding:1rem;margin-top:1rem;text-align:center;}
+.easter-egg.show{display:block;animation:fadein .5s;}
+.spark{width:50px;height:50px;animation:spark 1.2s infinite;}
+@keyframes spark{0%,100%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.15) rotate(8deg);}}
+
+details.teacher{background:#f4f0fb;border:2px dashed var(--fein);border-radius:12px;padding:.8rem 1rem;margin-top:1.5rem;}
+details.teacher summary{font-weight:800;color:#5b21b6;cursor:pointer;font-size:1rem;}
+.teacher-section{margin-top:.8rem;}
+.teacher-section h3{color:#5b21b6;margin-bottom:.3rem;}
+table.plan{width:100%;border-collapse:collapse;font-size:.88rem;margin:.4rem 0;}
+table.plan th,table.plan td{border:1px solid #d8cff0;padding:.4rem .5rem;text-align:left;}
+.afb{font-weight:700;color:#5b21b6;}
+
+#presOverlay{position:fixed;inset:0;background:linear-gradient(160deg,#083844,#0f8fa6);color:#fff;z-index:500;display:none;flex-direction:column;}
+#presOverlay.show{display:flex;}
+.pres-top{display:flex;justify-content:space-between;padding:.6rem 1rem;align-items:center;}
+.pres-stage{flex:1;display:flex;justify-content:center;align-items:flex-start;overflow:hidden;padding:0 1rem;}
+.pres-slide{width:100%;max-width:960px;aspect-ratio:4/3;background:rgba(255,255,255,.06);border-radius:18px;padding:2.2rem 2.6rem;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-start;gap:1rem;font-size:1.5rem;}
+.pres-slide::-webkit-scrollbar{width:6px;}
+.pres-line{opacity:0;transform:translateY(10px);transition:opacity .35s, transform .35s;}
+.pres-line.visible{opacity:1;transform:translateY(0);}
+.pres-slide h2{font-size:2rem;margin:0 0 .3rem;color:#ffe9b0;}
+.pres-answer{background:rgba(255,255,255,.12);border-radius:10px;padding:.6rem .9rem;margin-top:.4rem;cursor:pointer;}
+.pres-nav{display:flex;justify-content:center;gap:1rem;padding:1rem;}
+.pres-nav button{background:rgba(255,255,255,.2);color:#fff;font-size:1.1rem;padding:.6rem 1.4rem;}
+.pres-progress{font-size:1rem;opacity:.8;}
+.thumbrow{display:flex;gap:2rem;margin-top:.6rem;align-items:center;}
+.thumb{width:46px;height:46px;}
+.thumb-up{transform:rotate(0deg);color:#7CFC9A;}
+.thumb-side{transform:rotate(90deg);color:#ffd166;}
+.thumb-down{transform:rotate(180deg);color:#ff8a8a;}
+
+footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:2rem;}
+
+@media (max-width:600px){
+  .header-title{font-size:.95rem;}
+  nav.tabs button{min-width:90px;font-size:.82rem;}
+  .pres-slide{font-size:1.15rem;padding:1.4rem;}
+  .pres-slide h2{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+ <symbol id="thumbIcon" viewBox="0 0 64 64">
+   <path d="M20 30 h8 v-16 a6 6 0 0 1 12 0 v16 h10 a7 7 0 0 1 7 7 v14 a9 9 0 0 1 -9 9 h-24 a7 7 0 0 1 -7 -7 v-23 a7 7 0 0 1 7 -7 z" fill="currentColor"/>
+ </symbol>
+</svg>
+
+<header id="appHeader">
+  <div class="header-row">
+    <div class="header-title">⚡ Energie im Kondensator <span id="diamondBadge">◆</span></div>
+    <div class="header-btns">
+      <button class="btn-ghost btn-small" id="teacherJump">Für Lehrkräfte</button>
+      <button class="btn-primary btn-small" id="openPres">🖥 Präsentation</button>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="entdecken" class="active">Entdecken</button>
+    <button data-tab="sicherung">Sicherung</button>
+    <button data-tab="uebung">Übung</button>
+    <button data-tab="feinschliff">Feinschliff</button>
+    <button data-tab="abgabe">Abgabe</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ENTDECKEN -->
+<section class="tabpanel active" id="tab-entdecken">
+  <div class="problem-box">
+    <h2>Das Problem</h2>
+    <p>Ein Kamerablitz besitzt einen Kondensator mit der Kapazität <span class="formula">C = 1000 µF</span>. Eine kleine Batterie lädt ihn innerhalb mehrerer Sekunden auf eine Spannung von <span class="formula">U = 300 V</span> auf. Beim Blitz entlädt sich der Kondensator innerhalb von etwa einer Millisekunde vollständig. Erklären Sie, wie viel Energie im aufgeladenen Kondensator steckt und weshalb eine schwache Batterie diese Energiemenge überhaupt aufbauen kann.</p>
+  </div>
+
+  <div class="intro-box">
+    <p>Um dieses Rätsel zu lösen, gehen Sie in drei Schritten vor: In <strong>Schritt 1</strong> beobachten Sie an einem Gedankenexperiment, warum das Laden eines Kondensators zunehmend anstrengender wird. In <strong>Schritt 2</strong> bringen Sie diese Beobachtung mit der passenden Formel zusammen. In <strong>Schritt 3</strong> prüfen Sie die Formel am Diagramm und sehen, wovon die gespeicherte Energie abhängt.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="step-num">1</span>Gedankenexperiment: Ladung für Ladung</h2>
+    <p>Wir laden den Kondensator gedanklich auf, indem wir eine kleine Ladung nach der anderen von der einen zur anderen Platte transportieren. Tippen Sie die drei Punkte nacheinander (1 → 2 → 3) an und lesen Sie jeweils die Erklärung darunter.</p>
+    <div class="svg-wrap">
+      <svg viewBox="0 0 420 220" width="100%" style="max-width:480px">
+        <rect x="70" y="30" width="18" height="160" fill="#0a6678"/>
+        <rect x="332" y="30" width="18" height="160" fill="#58d6e8"/>
+        <text x="79" y="20" text-anchor="middle" font-size="13" fill="#0a6678" font-weight="700">−</text>
+        <text x="341" y="20" text-anchor="middle" font-size="13" fill="#0a6678" font-weight="700">+</text>
+        <circle cx="150" cy="150" r="7" fill="#f5a524"/>
+        <circle cx="210" cy="110" r="7" fill="#f5a524"/>
+        <circle cx="270" cy="60" r="7" fill="#f5a524"/>
+        <line x1="88" y1="150" x2="332" y2="150" stroke="#c3ebf1" stroke-width="2" stroke-dasharray="4 4"/>
+        <line x1="88" y1="110" x2="332" y2="110" stroke="#c3ebf1" stroke-width="2" stroke-dasharray="4 4"/>
+        <line x1="88" y1="60" x2="332" y2="60" stroke="#c3ebf1" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="150" y="172" text-anchor="middle" font-size="11" fill="#51767d">1. Ladung</text>
+        <text x="210" y="132" text-anchor="middle" font-size="11" fill="#51767d">mittlere Ladung</text>
+        <text x="270" y="82" text-anchor="middle" font-size="11" fill="#51767d">spätere Ladung</text>
+        <line x1="150" y1="150" x2="150" y2="140" stroke="#0f8fa6" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="210" y1="110" x2="210" y2="94" stroke="#0f8fa6" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="270" y1="60" x2="270" y2="38" stroke="#0f8fa6" stroke-width="3" marker-end="url(#arrow)"/>
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#0f8fa6"/>
+          </marker>
+        </defs>
+        <g class="hotspot" data-info="Punkt 1 – Die erste Ladung treffen wir auf einen nahezu feldfreien Kondensator. Zwischen den Platten herrscht noch kaum ein elektrisches Feld, die Spannung ist fast null. Deshalb ist nur sehr wenig Kraft nötig, um diese Ladung zur anderen Platte zu bringen.">
+          <circle cx="150" cy="150" r="14"/><text x="150" y="155" text-anchor="middle">1</text>
+        </g>
+        <g class="hotspot" data-info="Punkt 2 – Inzwischen sitzt schon einige Ladung auf den Platten. Dadurch hat sich ein elektrisches Feld aufgebaut, das der nächsten Ladung entgegenwirkt. Wir müssen also mehr Kraft aufwenden als beim ersten Schritt – und die Spannung U ist bereits deutlich gestiegen.">
+          <circle cx="210" cy="110" r="14"/><text x="210" y="115" text-anchor="middle">2</text>
+        </g>
+        <g class="hotspot" data-info="Punkt 3 – Der Kondensator ist schon größtenteils geladen. Das Gegenfeld – und damit die nötige Kraft – ist jetzt am größten. Die Arbeit W = U · q für den Transport dieser späten Ladung ist deutlich größer als für die allererste Ladung.">
+          <circle cx="270" cy="60" r="14"/><text x="270" y="65" text-anchor="middle">3</text>
+        </g>
+      </svg>
+    </div>
+    <div id="hotspotInfo">Tippen Sie zuerst auf Punkt 1.</div>
+    <div class="merksatz">Kernaussage: Je weiter der Kondensator schon geladen ist, desto größer ist die Spannung – und desto mehr Arbeit kostet der Transport der nächsten Ladung.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step-num">2</span>Von der Beobachtung zur Formel</h2>
+    <p>Ordnen Sie die vier Karten den passenden Erklärungen zu. Die Felder sind so angeordnet, dass daraus Schritt für Schritt die Energieformel entsteht.</p>
+    <p class="tap-hint">Antipp-Alternative: Karte antippen (markiert sich orange), danach passendes Feld antippen.</p>
+    <div class="match-area">
+      <div class="match-col" id="chipCol">
+        <div class="chip" draggable="true" data-match="4">E = ½ · Q · U = ½ · C · U²</div>
+        <div class="chip" draggable="true" data-match="1">U = Q / C</div>
+        <div class="chip" draggable="true" data-match="3">Gesamtarbeit = Summe aller Streifen</div>
+        <div class="chip" draggable="true" data-match="2">W = U · q (ein schmaler Streifen)</div>
+      </div>
+      <div class="match-col" id="dropCol">
+        <div class="dropzone" data-answer="1">die Spannung wächst proportional zur bereits vorhandenen Ladungsmenge – das erklärt, warum jeder Ladungsschritt mehr Arbeit kostet.</div>
+        <div class="dropzone" data-answer="2">die Arbeit für den Transport einer einzelnen, sehr kleinen Ladungsmenge q bei nahezu konstanter Spannung U.</div>
+        <div class="dropzone" data-answer="3">entspricht der Fläche unter der U-Q-Kurve – mathematisch betrachtet eine Integration.</div>
+        <div class="dropzone" data-answer="4">die Energie, die im vollständig geladenen Kondensator steckt – die Dreiecksfläche im Diagramm.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step-num">3</span>Die Formel am Diagramm prüfen</h2>
+    <p>Im U-Q-Diagramm entspricht die farbige Dreiecksfläche genau der Energie, die beim Laden aufgewendet wurde. Verändern Sie Spannung und Kapazität und beobachten Sie, wie sich die Fläche verändert.</p>
+    <div class="slider-row">
+      <label for="sliderU">Spannung U:</label>
+      <input type="range" id="sliderU" min="0" max="10" step="0.5" value="5">
+      <span class="readout" id="readU">5,0 V</span>
+    </div>
+    <div class="slider-row">
+      <span>Kapazität C:</span>
+      <div class="c-choice">
+        <button data-c="50" class="cbtn">50 µF</button>
+        <button data-c="100" class="cbtn active">100 µF</button>
+        <button data-c="150" class="cbtn">150 µF</button>
+      </div>
+    </div>
+    <div class="svg-wrap">
+      <svg viewBox="0 0 280 230" width="100%" style="max-width:340px">
+        <line x1="40" y1="190" x2="250" y2="190" stroke="#51767d" stroke-width="2"/>
+        <line x1="40" y1="190" x2="40" y2="20" stroke="#51767d" stroke-width="2"/>
+        <text x="255" y="195" font-size="11" fill="#51767d">Q</text>
+        <text x="30" y="18" font-size="11" fill="#51767d">U</text>
+        <polygon id="triangleArea" points="40,190 40,190 40,190" fill="#58d6e8" opacity="0.6"/>
+        <line id="hypotenuse" x1="40" y1="190" x2="40" y2="190" stroke="#0a6678" stroke-width="3"/>
+      </svg>
+    </div>
+    <p>Ladungsmenge: <span class="readout" id="readQ">–</span> &nbsp;·&nbsp; Energie: <span class="readout" id="readE">–</span></p>
+    <p class="hint">Beobachten Sie: Ziehen Sie den Regler für U und wechseln Sie die Kapazität C – beides verändert sowohl die Breite als auch die Höhe des Dreiecks und damit die eingeschlossene Fläche.</p>
+  </div>
+
+  <div class="checkpoint">
+    <div><strong>Haltepunkt:</strong> Vergleichen Sie Ihre Beobachtungen – bevor Sie weiterarbeiten, treffen Sie sich zur gemeinsamen Sicherung.</div>
+    <button class="btn-outline" data-goto="sicherung">Zur Sicherung →</button>
+  </div>
+</section>
+
+<!-- SICHERUNG -->
+<section class="tabpanel" id="tab-sicherung">
+  <div class="card">
+    <h2>Hefteintrag: Energie im Kondensator</h2>
+    <div class="svg-wrap">
+      <svg viewBox="0 0 260 220" width="100%" style="max-width:300px">
+        <line x1="40" y1="190" x2="240" y2="190" stroke="#51767d" stroke-width="2"/>
+        <line x1="40" y1="190" x2="40" y2="20" stroke="#51767d" stroke-width="2"/>
+        <text x="245" y="195" font-size="12" fill="#51767d">Q</text>
+        <text x="28" y="18" font-size="12" fill="#51767d">U</text>
+        <polygon points="40,190 200,190 200,50" fill="#58d6e8" opacity="0.6"/>
+        <line x1="40" y1="190" x2="200" y2="50" stroke="#0a6678" stroke-width="3"/>
+        <text x="130" y="140" font-size="13" fill="#0a6678" font-weight="700">E = Fläche</text>
+      </svg>
+    </div>
+    <div class="merksatz">1. Beim Aufladen eines Kondensators wächst die Spannung proportional zur bereits vorhandenen Ladungsmenge: U = Q / C. Deshalb wird für jede weitere Ladung mehr Arbeit benötigt.</div>
+    <div class="merksatz">2. Die gesamte beim Laden verrichtete Arbeit entspricht der Fläche unter der U-Q-Kurve – einem Dreieck.</div>
+    <div class="merksatz">3. Für die im Kondensator gespeicherte Energie gilt: E = ½ · Q · U = ½ · C · U² = Q² / (2 · C)</div>
+  </div>
+</section>
+
+<!-- ÜBUNG -->
+<section class="tabpanel" id="tab-uebung">
+  <div class="card">
+    <h2>Übungsaufgaben</h2>
+    <p class="hint">Diese Aufgaben sind immer geöffnet. Wer schneller fertig ist, arbeitet im Tab „Feinschliff" weiter.</p>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 1 · Ordnen Sie der Formel Q² / (2·C) die richtige Beschreibung zu.</label>
+      <label class="radio-opt"><input type="radio" name="t1" value="a"> Sie ergibt sich, wenn man in E = ½QU die Spannung U durch Q/C ersetzt.</label>
+      <label class="radio-opt"><input type="radio" name="t1" value="b"> Sie ergibt sich, wenn man in E = ½QU die Ladung Q durch C/U ersetzt.</label>
+      <label class="radio-opt"><input type="radio" name="t1" value="c"> Sie beschreibt die Kraft zwischen den Kondensatorplatten.</label>
+      <div class="feedback" id="fb-t1"></div>
+    </div>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 2 · Elif untersucht ein Fahrradrücklicht mit Standlichtfunktion (STARCAP, C = 0,33 F). Berechnen Sie die gespeicherte Energie bei U = 6,0 V.</label>
+      <input type="text" class="persist" id="t2" data-export="Aufgabe 2 (Energie Highcap)" placeholder="Ergebnis in Joule">
+      <button class="btn-outline btn-small" onclick="checkT2()">Prüfen</button>
+      <div class="feedback" id="fb-t2"></div>
+    </div>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 3 · Bestimmen Sie die Leuchtdauer t der Rücklicht-LED (Leistung P = 50 mW), wenn die gesamte in Aufgabe 2 berechnete Energie genutzt wird.</label>
+      <input type="text" class="persist" id="t3" data-export="Aufgabe 3 (Leuchtdauer)" placeholder="Ergebnis in Sekunden">
+      <button class="btn-outline btn-small" onclick="checkT3()">Prüfen</button>
+      <div class="feedback" id="fb-t3"></div>
+    </div>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 4 · Erläutern Sie, warum die tatsächliche Leuchtdauer in der Praxis deutlich kürzer ist als der berechnete Wert.</label>
+      <textarea class="persist" id="t4" data-export="Aufgabe 4 (Erläuterung Leuchtdauer)"></textarea>
+      <button class="btn-outline btn-small" onclick="unlock('t4')">Musterlösung anzeigen</button>
+      <div class="musterloesung" id="ml-t4">Musterlösung: Die LED benötigt eine Mindestspannung, um zu leuchten. Da die Spannung am Kondensator während der Entladung kontinuierlich sinkt, erlischt die LED bereits, bevor die gesamte gespeicherte Energie abgegeben wurde. Außerdem wurde die Leistung als konstant angenommen, tatsächlich sinkt sie mit der Spannung.</div>
+    </div>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 5 · Yusuf berechnet die Kapazität eines Defibrillator-Pufferkondensators. Berechnen Sie die Kapazität, wenn bei U = 4,0 kV eine Energie von 360 J bereitgestellt wird.</label>
+      <input type="text" class="persist" id="t5" data-export="Aufgabe 5 (Kapazität Defibrillator)" placeholder="Ergebnis in Farad oder µF">
+      <button class="btn-outline btn-small" onclick="checkT5()">Prüfen</button>
+      <div class="feedback" id="fb-t5"></div>
+    </div>
+
+    <div class="task">
+      <label class="task-label">Aufgabe 6 · Begründen Sie, welche Vorteile Kondensatoren gegenüber Akkus bei diesen beiden Anwendungen besitzen.</label>
+      <textarea class="persist" id="t6" data-export="Aufgabe 6 (Vorteile Kondensator vs. Akku)"></textarea>
+      <button class="btn-outline btn-small" onclick="unlock('t6')">Musterlösung anzeigen</button>
+      <div class="musterloesung" id="ml-t6">Musterlösung: Kondensatoren können ihre Energie sehr schnell abgeben beziehungsweise aufnehmen (hohe Leistung in kurzer Zeit), während Akkus eher für kleinere, über lange Zeit gleichbleibende Leistungen geeignet sind. Zudem vertragen Kondensatoren sehr viele Lade- und Entladezyklen ohne nennenswerten Verschleiß.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEINSCHLIFF -->
+<section class="tabpanel" id="tab-feinschliff">
+  <div class="card">
+    <h2>◆ Feinschliff: Kondensatorspielereien</h2>
+    <p class="hint">Der Plattenabstand eines Kondensators wird von d auf 2d verdoppelt. Beurteilen Sie die Auswirkungen in zwei Szenarien.</p>
+    <p>Grundregeln: Bei angeschlossener Spannungsquelle bleibt die Spannung U gleich. Bei abgeklemmter Spannungsquelle bleibt die Ladungsmenge Q gleich.</p>
+
+    <h3>Szenario A: Spannungsquelle bleibt angeschlossen</h3>
+    <table class="geo-table">
+      <tr><th>Größe</th><th>Veränderung</th></tr>
+      <tr><td>Kapazität C</td><td><select class="persist geo" id="gA-C" data-export="Feinschliff A – C"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Ladungsmenge Q</td><td><select class="persist geo" id="gA-Q" data-export="Feinschliff A – Q"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Spannung U</td><td><select class="persist geo" id="gA-U" data-export="Feinschliff A – U"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Feldstärke E</td><td><select class="persist geo" id="gA-E" data-export="Feinschliff A – E"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Energie Eel</td><td><select class="persist geo" id="gA-Eel" data-export="Feinschliff A – Eel"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+    </table>
+
+    <h3>Szenario B: Spannungsquelle wird abgeklemmt</h3>
+    <table class="geo-table">
+      <tr><th>Größe</th><th>Veränderung</th></tr>
+      <tr><td>Kapazität C</td><td><select class="persist geo" id="gB-C" data-export="Feinschliff B – C"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Ladungsmenge Q</td><td><select class="persist geo" id="gB-Q" data-export="Feinschliff B – Q"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Spannung U</td><td><select class="persist geo" id="gB-U" data-export="Feinschliff B – U"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Feldstärke E</td><td><select class="persist geo" id="gB-E" data-export="Feinschliff B – E"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+      <tr><td>Energie Eel</td><td><select class="persist geo" id="gB-Eel" data-export="Feinschliff B – Eel"><option value="">wählen</option><option value="steigt">steigt</option><option value="sinkt">sinkt</option><option value="gleich">bleibt gleich</option></select></td></tr>
+    </table>
+
+    <div class="task">
+      <label class="task-label">Begründen Sie Ihre Entscheidungen für beide Szenarien mithilfe der bekannten Formeln (C = ε₀·εᵣ·A/d, Q = C·U, E = U/d, Eel = ½·C·U²).</label>
+      <textarea class="persist" id="t7" data-export="Feinschliff Begründung"></textarea>
+      <button class="btn-outline btn-small" onclick="checkFein()">Prüfen &amp; abschließen</button>
+      <div class="feedback" id="fb-fein"></div>
+    </div>
+
+    <div class="easter-egg" id="egg">
+      <svg class="spark" viewBox="0 0 64 64"><path d="M34 2 14 36h14l-6 26 28-38H34l6-22z" fill="#f5a524"/></svg>
+      <p><strong>Kondensator-Wissen entladen!</strong><br>Fun Fact: Die ersten Kondensatoren waren „Leidener Flaschen" aus dem 18. Jahrhundert – mit Metallfolie beschichtete Glasgefäße, mit denen Forscher die gespeicherte elektrische Energie eindrucksvoll (und schmerzhaft) demonstrierten.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABGABE -->
+<section class="tabpanel" id="tab-abgabe">
+  <div class="card">
+    <h2>Abgabe</h2>
+    <label class="task-label">Name</label>
+    <input type="text" class="persist" id="abgabeName" data-export="Name">
+    <label class="task-label" style="margin-top:.6rem">Klasse</label>
+    <input type="text" class="persist" id="abgabeKlasse" data-export="Klasse">
+    <p class="hint" style="margin-top:.8rem">Beim Export werden alle bisherigen Eingaben aus Übung und Feinschliff in einer Textdatei gesammelt.</p>
+    <button class="btn-primary" onclick="exportAll()">⬇ Alle Eingaben als .txt exportieren</button>
+  </div>
+</section>
+
+<details class="teacher" id="teacherBox">
+  <summary>Für Lehrkräfte</summary>
+  <div class="teacher-section">
+    <h3>Stundenverlauf (45 Minuten)</h3>
+    <table class="plan">
+      <tr><th>Zeit</th><th>Phase</th><th>Inhalt / Sozialform</th></tr>
+      <tr><td>5'</td><td>Einstieg</td><td>Problemfolie Kamerablitz (Präsentationsmodus), Plenum</td></tr>
+      <tr><td>15'</td><td>Entdecken</td><td>Hotspot-Grafik, Zuordnung, Schieberegler – Einzel-/Partnerarbeit am Tablet</td></tr>
+      <tr><td>5'</td><td>Sicherung</td><td>Gemeinsamer Vergleich, Hefteintrag übernehmen</td></tr>
+      <tr><td>15'</td><td>Übung</td><td>Gestufte Aufgaben, offen für alle; schnelle Lernende wechseln zum Feinschliff</td></tr>
+      <tr><td>5'</td><td>Abschluss</td><td>Daumenprobe zu zwei Aussagen, kurzer Ausblick</td></tr>
+    </table>
+
+    <h3>Erwartungshorizont (Anforderungsbereiche)</h3>
+    <table class="plan">
+      <tr><th>AFB</th><th>Erwartete Leistung</th></tr>
+      <tr><td class="afb">AFB I</td><td>Formel E = ½CU² nennen, Werte aus Diagramm ablesen (Aufgabe 1)</td></tr>
+      <tr><td class="afb">AFB II</td><td>Werte einsetzen und berechnen, Energieformen umformen (Aufgaben 2, 3, 5)</td></tr>
+      <tr><td class="afb">AFB III</td><td>Vereinfachungen diskutieren, Vor- und Nachteile begründen, Plattengeometrie mit Formeln argumentativ erschließen (Aufgaben 4, 6, Feinschliff)</td></tr>
+    </table>
+
+    <h3>Fachliche Hinweise / Vereinfachungen</h3>
+    <p>Die Herleitung über das Gedankenexperiment nähert die kontinuierliche Integration durch diskrete Ladungsschritte an; mathematisch exakt ist die Fläche unter der U-Q-Geraden ein Integral. In Aufgabe 3/4 wird vereinfachend eine konstante Leistung angenommen, real sinkt die Spannung (und damit die Leistung) während der Entladung kontinuierlich. Verlustwärme am Innenwiderstand beim Lade-/Entladevorgang wird in dieser Stunde nicht betrachtet.</p>
+
+    <h3>Datenquellen</h3>
+    <p>LeifiPhysik – Elektrizitätslehre, Kondensator und Kapazität, Elektrische Energie im geladenen Kondensator: <a href="https://www.leifiphysik.de/elektrizitaetslehre/kondensator-und-kapazitaet" target="_blank" rel="noopener">leifiphysik.de</a><br>
+    LehrplanPLUS Bayern, Gymnasium, Physik 12, Lernbereich „Mathematisieren und Vorhersagen": <a href="https://www.lehrplanplus.bayern.de/fachlehrplan/gymnasium/12/physik/grundlegend" target="_blank" rel="noopener">lehrplanplus.bayern.de</a></p>
+  </div>
+</details>
+
+</main>
+
+<footer>Eingaben werden lokal im Browser gespeichert (localStorage) und bleiben nach dem Neuladen erhalten.</footer>
+
+<!-- PRÄSENTATIONSMODUS -->
+<div id="presOverlay">
+  <div class="pres-top">
+    <span class="pres-progress" id="presProgress">Folie 1 / 5</span>
+    <button class="btn-ghost btn-small" id="closePres">Schließen ✕</button>
+  </div>
+  <div class="pres-stage"><div class="pres-slide" id="presSlide"></div></div>
+  <div class="pres-nav">
+    <button id="presPrev">◀ Zurück</button>
+    <button id="presNext">Weiter ▶</button>
+  </div>
+</div>
+
+<script>
+/* ---------- Tab-Navigation ---------- */
+const tabButtons = document.querySelectorAll('nav.tabs button');
+const panels = document.querySelectorAll('.tabpanel');
+function showTab(name){
+  tabButtons.forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  panels.forEach(p=>p.classList.toggle('active', p.id==='tab-'+name));
+  if(name==='feinschliff'){ localStorage.setItem('ekond_fein_opened','1'); updateDiamond(); }
+}
+tabButtons.forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.goto)));
+function updateDiamond(){
+  if(localStorage.getItem('ekond_fein_opened')==='1'){
+    document.getElementById('diamondBadge').classList.add('show');
+    document.getElementById('appHeader').classList.add('fein-active');
+  }
+}
+updateDiamond();
+document.getElementById('teacherJump').addEventListener('click',()=>{
+  const d = document.getElementById('teacherBox');
+  d.open = true;
+  d.scrollIntoView({behavior:'smooth'});
+});
+
+/* ---------- localStorage persist ---------- */
+document.querySelectorAll('.persist').forEach(el=>{
+  const key = 'ekond_'+el.id;
+  const saved = localStorage.getItem(key);
+  if(saved!==null){
+    if(el.type==='radio'){ /* handled below */ }
+    else el.value = saved;
+  }
+  el.addEventListener('input',()=>localStorage.setItem(key, el.value));
+  el.addEventListener('change',()=>localStorage.setItem(key, el.value));
+});
+document.querySelectorAll('input[type=radio]').forEach(r=>{
+  const key = 'ekond_radio_'+r.name;
+  if(localStorage.getItem(key)===r.value) r.checked = true;
+  r.addEventListener('change',()=>localStorage.setItem(key, r.value));
+});
+
+/* ---------- Hotspots ---------- */
+document.querySelectorAll('.hotspot').forEach(h=>{
+  h.addEventListener('click',()=>{
+    document.querySelectorAll('.hotspot').forEach(x=>x.classList.remove('active'));
+    h.classList.add('active');
+    document.getElementById('hotspotInfo').textContent = h.dataset.info;
+  });
+});
+
+/* ---------- Drag & Drop + Tap matching ---------- */
+let selectedChip = null;
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', chip.dataset.match); });
+  chip.addEventListener('click', ()=>{
+    if(chip.classList.contains('used')) return;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+    if(selectedChip===chip){ selectedChip=null; return; }
+    chip.classList.add('selected');
+    selectedChip = chip;
+  });
+});
+document.querySelectorAll('.dropzone').forEach(zone=>{
+  zone.addEventListener('dragover', e=>e.preventDefault());
+  zone.addEventListener('drop', e=>{
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    placeMatch(id, zone);
+  });
+  zone.addEventListener('click', ()=>{
+    if(selectedChip){
+      placeMatch(selectedChip.dataset.match, zone);
+      selectedChip.classList.remove('selected');
+      selectedChip = null;
+    }
+  });
+});
+function placeMatch(id, zone){
+  if(zone.classList.contains('filled')) return;
+  const chip = document.querySelector('.chip[data-match="'+id+'"]');
+  if(!chip || chip.classList.contains('used')) return;
+  zone.classList.add('filled');
+  const correct = zone.dataset.answer === id;
+  zone.classList.add(correct ? 'correct' : 'incorrect');
+  zone.textContent = (correct ? '✓ ' : '✗ (noch mal versuchen – Karte wird wieder frei) ') + chip.textContent;
+  if(correct){
+    chip.classList.add('used');
+  } else {
+    setTimeout(()=>{
+      zone.classList.remove('filled','incorrect');
+      zone.textContent = zone.dataset.originalText;
+    }, 1600);
+  }
+}
+document.querySelectorAll('.dropzone').forEach(z=>z.dataset.originalText = z.textContent);
+
+/* ---------- Slider / Dreieck (reagiert jetzt auf U UND C) ---------- */
+const sliderU = document.getElementById('sliderU');
+const readU = document.getElementById('readU');
+const readQ = document.getElementById('readQ');
+const readE = document.getElementById('readE');
+const triangle = document.getElementById('triangleArea');
+const hyp = document.getElementById('hypotenuse');
+let currentC = 100; // µF
+const QMAX = 150e-6 * 10; // Referenzwert: größte darstellbare Ladung (C=150µF, U=10V)
+const UMAX = 10; // V
+document.querySelectorAll('.cbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentC = parseFloat(btn.dataset.c);
+    updateTriangle();
+  });
+});
+function updateTriangle(){
+  const U = parseFloat(sliderU.value);
+  readU.textContent = U.toFixed(1)+' V';
+  const Cf = currentC*1e-6;
+  const Q = Cf*U; // Coulomb
+  const E = 0.5*Cf*U*U;
+  readQ.textContent = (Q*1000).toFixed(2)+' mC';
+  readE.textContent = (E*1000).toFixed(2)+' mJ';
+  const px = 40 + (Q/QMAX)*210;
+  const py = 190 - (U/UMAX)*170;
+  triangle.setAttribute('points', `40,190 ${px.toFixed(1)},190 ${px.toFixed(1)},${py.toFixed(1)}`);
+  hyp.setAttribute('x1',40); hyp.setAttribute('y1',190);
+  hyp.setAttribute('x2',px.toFixed(1)); hyp.setAttribute('y2',py.toFixed(1));
+}
+sliderU.addEventListener('input', updateTriangle);
+updateTriangle();
+
+/* ---------- Übungsaufgaben Prüfung ---------- */
+function showFb(id, ok, text){
+  const el = document.getElementById(id);
+  el.className = 'feedback show ' + (ok?'ok':'bad');
+  el.textContent = text;
+}
+document.querySelectorAll('input[name=t1]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    if(r.value==='a') showFb('fb-t1', true, 'Richtig: Mit U = Q/C ersetzt, ergibt sich aus E = ½QU direkt E = Q²/(2C).');
+    else showFb('fb-t1', false, 'Das passt noch nicht. Setzen Sie U = Q/C in E = ½·Q·U ein und prüfen Sie, welche Größe ersetzt wird.');
+  });
+});
+function checkT2(){
+  const v = parseFloat(document.getElementById('t2').value.replace(',','.'));
+  if(isNaN(v)){ showFb('fb-t2', false, 'Bitte geben Sie ein Zahlenergebnis ein.'); return; }
+  if(Math.abs(v-5.94) < 0.3) showFb('fb-t2', true, 'Richtig: E = ½ · 0,33 F · (6,0 V)² ≈ 5,9 J.');
+  else showFb('fb-t2', false, 'Prüfen Sie: Haben Sie C in Farad und U in Volt eingesetzt und U quadriert?');
+}
+function checkT3(){
+  const v = parseFloat(document.getElementById('t3').value.replace(',','.'));
+  if(isNaN(v)){ showFb('fb-t3', false, 'Bitte geben Sie ein Zahlenergebnis ein.'); return; }
+  if(Math.abs(v-118.8) < 10) showFb('fb-t3', true, 'Richtig: t = E/P ≈ 5,94 J / 0,05 W ≈ 119 s.');
+  else showFb('fb-t3', false, 'Prüfen Sie die Formel t = E/P und ob Sie die Leistung in Watt (nicht Milliwatt) eingesetzt haben.');
+}
+function checkT5(){
+  const raw = document.getElementById('t5').value.replace(',','.');
+  const v = parseFloat(raw);
+  if(isNaN(v)){ showFb('fb-t5', false, 'Bitte geben Sie ein Zahlenergebnis ein.'); return; }
+  const inMikro = v > 1 ? v : v*1e6;
+  if(Math.abs(inMikro-45) < 5) showFb('fb-t5', true, 'Richtig: C = 2E/U² = 2 · 360 J / (4000 V)² = 45 µF.');
+  else showFb('fb-t5', false, 'Stellen Sie E = ½CU² nach C um und prüfen Sie, ob Sie U = 4,0 kV = 4000 V eingesetzt haben.');
+}
+function unlock(id){
+  document.getElementById('ml-'+id).classList.add('show');
+}
+function checkFein(){
+  const expected = {
+  'gA-C':'sinkt','gA-Q':'sinkt','gA-U':'gleich','gA-E':'sinkt','gA-Eel':'sinkt',
+  'gB-C':'sinkt','gB-Q':'gleich','gB-U':'steigt','gB-E':'gleich','gB-Eel':'steigt'
+};
+
+  let allFilled = true, allCorrect = true;
+  Object.keys(expected).forEach(id=>{
+    const val = document.getElementById(id).value;
+    if(!val) allFilled = false;
+    if(val !== expected[id]) allCorrect = false;
+  });
+  if(!allFilled){ showFb('fb-fein', false, 'Bitte füllen Sie zunächst beide Tabellen vollständig aus.'); return; }
+  if(allCorrect){
+    showFb('fb-fein', true, 'Alle Zuordnungen stimmen mit der physikalischen Argumentation überein.');
+    document.getElementById('egg').classList.add('show');
+    localStorage.setItem('ekond_fein_done','1');
+  } else {
+    showFb('fb-fein', false, 'Noch nicht alles stimmig. Prüfen Sie insbesondere, welche Größe in jedem Szenario konstant gehalten wird (U bei angeschlossener Quelle, Q bei abgeklemmter Quelle).');
+  }
+}
+
+/* ---------- Export ---------- */
+function exportAll(){
+  let lines = [];
+  lines.push('Energie im Kondensator – Eingaben');
+  lines.push('Exportiert am: ' + new Date().toLocaleString('de-DE'));
+  lines.push('');
+  document.querySelectorAll('[data-export]').forEach(el=>{
+    const label = el.dataset.export;
+    const val = el.value || '(leer)';
+    lines.push(label + ': ' + val);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nameVal = document.getElementById('abgabeName').value || 'unbenannt';
+  a.download = 'Energie_im_Kondensator_' + nameVal.replace(/\s+/g,'_') + '.txt';
+  a.click();
+}
+
+/* ---------- Präsentationsmodus ---------- */
+const slides = [
+  { title:'Kurze Wiederholung', lines:[
+      {q:'Wie lautet die Formel für die Kapazität eines Plattenkondensators?', a:'C = ε₀ · εᵣ · A / d'},
+      {q:'Was gibt die Fläche unter einer Strom-Zeit-Kurve an?', a:'Die transportierte Ladungsmenge Q.'}
+    ]},
+  { title:'Problem', lines:[
+      {text:'Ein Kamerablitz besitzt einen Kondensator mit C = 1000 µF. Eine kleine Batterie lädt ihn in mehreren Sekunden auf U = 300 V. Beim Blitz entlädt sich der Kondensator in etwa einer Millisekunde.'},
+      {text:'Erklären Sie: Wie viel Energie steckt im aufgeladenen Kondensator – und wie kann eine schwache Batterie das aufbauen?'}
+    ]},
+  { title:'Arbeitsauftrag', lines:[
+      {text:'Bearbeiten Sie in Einzel- oder Partnerarbeit den Tab „Entdecken" auf Ihrem Tablet.'},
+      {text:'Nutzen Sie die Hotspot-Grafik, die Zuordnungsaufgabe und den Schieberegler, um die Energieformel selbst herzuleiten.'},
+      {text:'Zeit: etwa 15 Minuten. Danach treffen wir uns zur gemeinsamen Sicherung.'}
+    ]},
+  { title:'Sicherung', lines:[
+      {text:'Die Spannung wächst proportional zur bereits vorhandenen Ladungsmenge: U = Q / C.'},
+      {text:'Die gesamte Arbeit entspricht der Dreiecksfläche unter der U-Q-Kurve.'},
+      {text:'E = ½ · Q · U = ½ · C · U² = Q² / (2·C)'}
+    ]},
+  { title:'Daumenprobe', lines:[
+      {text:'Aussage 1: „Ich kann erklären, warum die Arbeit für jede weitere Ladung größer wird."'},
+      {thumbs:true},
+      {text:'Aussage 2: „Ich kann die Formel E = ½CU² sicher anwenden und erläutern, woher der Faktor ½ kommt."'},
+      {thumbs:true}
+    ]}
+];
+let slideIdx = 0, lineIdx = 0;
+const presOverlay = document.getElementById('presOverlay');
+const presSlide = document.getElementById('presSlide');
+const presProgress = document.getElementById('presProgress');
+
+function renderSlide(){
+  presSlide.innerHTML = '<h2>'+slides[slideIdx].title+'</h2>';
+  slides[slideIdx].lines.forEach((ln, i)=>{
+    const div = document.createElement('div');
+    div.className = 'pres-line';
+    if(ln.thumbs){
+      div.innerHTML = '<div class="thumbrow">'+
+        '<svg class="thumb thumb-up"><use href="#thumbIcon"/></svg><span>verstanden</span>'+
+        '<svg class="thumb thumb-side"><use href="#thumbIcon"/></svg><span>teilweise</span>'+
+        '<svg class="thumb thumb-down"><use href="#thumbIcon"/></svg><span>unsicher</span>'+
+        '</div>';
+    } else if(ln.q){
+      div.innerHTML = '<div>'+ln.q+'</div><div class="pres-answer" data-revealed="0">Antwort anzeigen</div>';
+    } else {
+      div.textContent = ln.text;
+    }
+    presSlide.appendChild(div);
+  });
+  presSlide.querySelectorAll('.pres-answer').forEach((ans, i)=>{
+    ans.addEventListener('click', ()=>{
+      if(ans.dataset.revealed==='0'){
+        ans.textContent = slides[slideIdx].lines[i].a;
+        ans.dataset.revealed='1';
+      }
+    });
+  });
+  lineIdx = 0;
+  revealUpTo(0);
+  presProgress.textContent = 'Folie '+(slideIdx+1)+' / '+slides.length;
+}
+function revealUpTo(n){
+  const lines = presSlide.querySelectorAll('.pres-line');
+  lines.forEach((l,i)=>{ if(i<=n) l.classList.add('visible'); else l.classList.remove('visible'); });
+  if(lines[n]) lines[n].scrollIntoView({behavior:'smooth', block:'center'});
+}
+function nextStep(){
+  const total = slides[slideIdx].lines.length;
+  if(lineIdx < total-1){ lineIdx++; revealUpTo(lineIdx); }
+  else if(slideIdx < slides.length-1){ slideIdx++; renderSlide(); }
+}
+function prevStep(){
+  if(lineIdx > 0){ lineIdx--; revealUpTo(lineIdx); }
+  else if(slideIdx > 0){ slideIdx--; renderSlide(); lineIdx = slides[slideIdx].lines.length-1; revealUpTo(lineIdx); }
+}
+document.getElementById('openPres').addEventListener('click',()=>{
+  presOverlay.classList.add('show');
+  slideIdx = 0; renderSlide();
+});
+document.getElementById('closePres').addEventListener('click',()=>presOverlay.classList.remove('show'));
+document.getElementById('presNext').addEventListener('click', nextStep);
+document.getElementById('presPrev').addEventListener('click', prevStep);
+document.addEventListener('keydown', e=>{
+  if(!presOverlay.classList.contains('show')) return;
+  if(e.key==='ArrowRight' || e.key===' ') { nextStep(); e.preventDefault(); }
+  if(e.key==='ArrowLeft') { prevStep(); e.preventDefault(); }
+  if(e.key==='Escape') presOverlay.classList.remove('show');
+});
+</script>
+</body>
+</html>
